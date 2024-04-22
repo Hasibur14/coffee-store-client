@@ -1,27 +1,69 @@
+import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import editImage from '../assets/images/Frame (8).png';
 import viewImage from '../assets/images/Frame (9).png';
 import deleteImage from '../assets/images/delete 1.png';
 
 
-const CoffeeCard = ({ coffee }) => {
+const CoffeeCard = ({ coffee, coffees, setCoffees }) => {
 
-    const { name, quantity, supplier, taste, category, details, photo } = coffee;
+    const { _id, name, quantity, supplier, taste, category, details, photo } = coffee;
+
+
+    const handleDelete = _id => {
+        console.log(_id);
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                fetch(`http://localhost:5000/coffee/${_id}`, {
+                    method: 'DELETE'
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log(data);
+                        if (data.deletedCount > 0) {
+                            Swal.fire({
+                                title: "Deleted!",
+                                text: "Your file has been deleted.",
+                                icon: "success"
+                            })
+                            const remaining = coffees.filter(coff => coff._id !== _id)
+                            setCoffees(remaining)
+                        }
+                    })
+            }
+        });
+    }
+
+
+
+
     return (
         <div>
             <div className="card card-side bg-base-100 shadow-xl">
                 <figure><img className="p-8  h-96 w-96" src={photo} alt="Movie" /></figure>
                 <div className=" flex justify-between w-full pr-4 p-10">
-                   <div>
-                   <h2 className="card-title">Name:{name}</h2>
-                    <p> Quantity: {quantity}</p>
-                    <p>Chef: {supplier}</p>
-                    <p>Taste: {taste}</p>
-                   </div>
+                    <div>
+                        <h2 className="card-title">Name:{name}</h2>
+                        <p> Quantity: {quantity}</p>
+                        <p>Chef: {supplier}</p>
+                        <p>Taste: {taste}</p>
+                    </div>
                     <div className="card-actions justify-end">
                         <div className="join join-vertical space-y-4">
                             <button className="btn join-item bg-yellow-600 text-white"><img src={viewImage} alt="" /> View</button>
-                            <button className="btn join-item bg-black text-white" ><img src={editImage} alt="" /> Edit</button>
-                            <button className="btn join-item bg-red-500 text-white"><img src={deleteImage} alt="" /> Delete</button>
+                            <Link to={`updateCoffee/${_id}`}>
+                                <button className="btn join-item bg-black text-white" ><img src={editImage} alt="" /> Edit</button>
+                            </Link>
+                            <button onClick={() => handleDelete(_id)} className="btn join-item bg-red-500 text-white"><img src={deleteImage} alt="" /> Delete</button>
                         </div>
                     </div>
                 </div>
